@@ -61,10 +61,11 @@ def save_state(state):
         json.dump(state, f, indent=2, ensure_ascii=False)
 
 def send_email(arretes):
+    destinataires = [a.strip() for a in EMAIL_TO.split(",")]
     msg = MIMEMultipart("alternative")
     msg["Subject"] = f"Nouveaux arretes prefectoraux Loiret ({len(arretes)})"
     msg["From"] = EMAIL_FROM
-    msg["To"] = EMAIL_TO
+    msg["To"] = ", ".join(destinataires)
     lignes = []
     for a in arretes:
         lignes.append(f"\n{a['titre']}\n{a['contenu']}")
@@ -75,8 +76,8 @@ def send_email(arretes):
     with smtplib.SMTP("smtp.gmail.com", 587) as s:
         s.starttls()
         s.login(EMAIL_FROM, EMAIL_PASS)
-        s.sendmail(EMAIL_FROM, EMAIL_TO, msg.as_string())
-    print(f"Email envoye : {len(arretes)} arrete(s)")
+        s.sendmail(EMAIL_FROM, destinataires, msg.as_string())
+    print(f"Email envoye : {len(arretes)} arrete(s) a {len(destinataires)} destinataire(s)")
 
 def main():
     state = load_state()
